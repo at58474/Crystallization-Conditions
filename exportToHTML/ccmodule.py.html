@@ -1,0 +1,170 @@
+<html>
+<head>
+<title>ccmodule.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #629755; font-style: italic;}
+.s3 { color: #808080;}
+.s4 { color: #6a8759;}
+.s5 { color: #6897bb;}
+.ln { color: #606366; font-weight: normal; font-style: normal; }
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+ccmodule.py</font>
+</center></td></tr></table>
+<pre><span class="s0">def </span><span class="s1">extract_organic_precipitates(self):</span>
+<a name="l376"><span class="ln">376  </span></a>
+<a name="l377"><span class="ln">377  </span></a>        <span class="s2">&quot;&quot;&quot; 
+<a name="l378"><span class="ln">378  </span></a>        This method executes a for loop that iterates through each line of the self.conditions list: 
+<a name="l379"><span class="ln">379  </span></a>            - Searches the line to determine if it contains a percentage or percentage range, all of which could be 
+<a name="l380"><span class="ln">380  </span></a>              either an integer or floating point number. The regular expression created to perform this task is as 
+<a name="l381"><span class="ln">381  </span></a>              follows: 
+<a name="l382"><span class="ln">382  </span></a>                - r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[%]' 
+<a name="l383"><span class="ln">383  </span></a>                - this conditional statement uses re.search(expression, string) imported from the re library 
+<a name="l384"><span class="ln">384  </span></a>                - the re.search() function call is wrapped in a bool function call, so if there is a REGEX match the 
+<a name="l385"><span class="ln">385  </span></a>                  line will be processed 
+<a name="l386"><span class="ln">386  </span></a>            - Then the line is split using re.split(expression, string). The expression used is the same as above but 
+<a name="l387"><span class="ln">387  </span></a>              at the end includes the following: 
+<a name="l388"><span class="ln">388  </span></a>                - A space or no space 
+<a name="l389"><span class="ln">389  </span></a>                - Any set of characters which ends at a space 
+<a name="l390"><span class="ln">390  </span></a>                - A space or no space 
+<a name="l391"><span class="ln">391  </span></a>                - Any set of characters which ends at a space 
+<a name="l392"><span class="ln">392  </span></a>              The goal of this is to capture any chemical name that comes after the percentage, since the 
+<a name="l393"><span class="ln">393  </span></a>              chemical names are highly varied. 
+<a name="l394"><span class="ln">394  </span></a>            - This regex has numerous capturing groups, a bool filter is applied to the line to remove list items 
+<a name="l395"><span class="ln">395  </span></a>              such as '', none, NaN, False, etc. 
+<a name="l396"><span class="ln">396  </span></a>            - Another for loop is used to iterate through each list item in the line list. 
+<a name="l397"><span class="ln">397  </span></a>                - The same conditional statement is used to determine if the list item contains a percentage/range 
+<a name="l398"><span class="ln">398  </span></a>                - If it does then that list item is appended to the organic_precipitates_list 
+<a name="l399"><span class="ln">399  </span></a>        &quot;&quot;&quot;</span>
+<a name="l400"><span class="ln">400  </span></a>
+<a name="l401"><span class="ln">401  </span></a>        <span class="s1">organic_precipitates_list = []</span>
+<a name="l402"><span class="ln">402  </span></a>        <span class="s1">organic_precipitates_dict = {}</span>
+<a name="l403"><span class="ln">403  </span></a>
+<a name="l404"><span class="ln">404  </span></a>        <span class="s0">for </span><span class="s1">line </span><span class="s0">in </span><span class="s1">self.conditions:</span>
+<a name="l405"><span class="ln">405  </span></a>            <span class="s3"># If the line contains a percentage, then process the line</span>
+<a name="l406"><span class="ln">406  </span></a>            <span class="s0">if </span><span class="s1">bool(re.search(</span><span class="s4">r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[%]'</span><span class="s0">, </span><span class="s1">line)):</span>
+<a name="l407"><span class="ln">407  </span></a>
+<a name="l408"><span class="ln">408  </span></a>                <span class="s3"># Split the line based on the percentage regex</span>
+<a name="l409"><span class="ln">409  </span></a>                <span class="s3"># Must wrap the regex in a capturing group... () ... to keep the matched regex in the created list</span>
+<a name="l410"><span class="ln">410  </span></a>                <span class="s1">line = re.split(</span><span class="s4">r'(((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[%]\s?([^\s]+)?\s?([^\s]+)?\s?([^\s]+)?)'</span><span class="s0">, </span><span class="s1">line)</span>
+<a name="l411"><span class="ln">411  </span></a>                <span class="s1">line = list(filter(bool</span><span class="s0">, </span><span class="s1">line))</span>
+<a name="l412"><span class="ln">412  </span></a>
+<a name="l413"><span class="ln">413  </span></a>                <span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">line:</span>
+<a name="l414"><span class="ln">414  </span></a>                    <span class="s0">if </span><span class="s1">bool(re.search(</span><span class="s4">r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[%]'</span><span class="s0">, </span><span class="s1">x)):</span>
+<a name="l415"><span class="ln">415  </span></a>                        <span class="s1">organic_precipitates_list.append(x)</span>
+<a name="l416"><span class="ln">416  </span></a>
+<a name="l417"><span class="ln">417  </span></a>        <span class="s0">def </span><span class="s1">remove_bad_words(organic_prec_list):</span>
+<a name="l418"><span class="ln">418  </span></a>            <span class="s3"># Must be careful none of the words here are found in a chemical name.</span>
+<a name="l419"><span class="ln">419  </span></a>            <span class="s3"># Could add a space before and after, but sometimes spaces are forgotten in the files and these words are</span>
+<a name="l420"><span class="ln">420  </span></a>            <span class="s3">#   appended to a chemical name...</span>
+<a name="l421"><span class="ln">421  </span></a>            <span class="s1">words_to_exclude = [</span><span class="s4">'AND'</span><span class="s0">, </span><span class="s4">'DEGREES'</span><span class="s0">, </span><span class="s4">'CONCENTRATION'</span><span class="s0">, </span><span class="s4">'PRIOR'</span><span class="s0">, </span><span class="s4">'DATA'</span><span class="s0">, </span><span class="s4">' THE'</span><span class="s0">, </span><span class="s4">'AQUEOUS'</span><span class="s1">]</span>
+<a name="l422"><span class="ln">422  </span></a>            <span class="s0">for </span><span class="s1">item </span><span class="s0">in </span><span class="s1">organic_prec_list:</span>
+<a name="l423"><span class="ln">423  </span></a>                <span class="s1">index = organic_prec_list.index(item)</span>
+<a name="l424"><span class="ln">424  </span></a>                <span class="s0">for </span><span class="s1">word </span><span class="s0">in </span><span class="s1">words_to_exclude:</span>
+<a name="l425"><span class="ln">425  </span></a>                    <span class="s0">if </span><span class="s1">item.find(word) != -</span><span class="s5">1</span><span class="s1">:</span>
+<a name="l426"><span class="ln">426  </span></a>                        <span class="s1">item = item.replace(word</span><span class="s0">, </span><span class="s4">''</span><span class="s1">)</span>
+<a name="l427"><span class="ln">427  </span></a>                <span class="s1">organic_prec_list[index] = item</span>
+<a name="l428"><span class="ln">428  </span></a>            <span class="s0">return </span><span class="s1">organic_prec_list</span>
+<a name="l429"><span class="ln">429  </span></a>
+<a name="l430"><span class="ln">430  </span></a>        <span class="s0">def </span><span class="s1">create_dict(organic_prec_list):</span>
+<a name="l431"><span class="ln">431  </span></a>            <span class="s1">temp_dict = {}</span>
+<a name="l432"><span class="ln">432  </span></a>            <span class="s0">for </span><span class="s1">item </span><span class="s0">in </span><span class="s1">organic_prec_list:</span>
+<a name="l433"><span class="ln">433  </span></a>                <span class="s3"># Find the percentage and store into percentage variable</span>
+<a name="l434"><span class="ln">434  </span></a>                <span class="s1">percentage = re.match(</span><span class="s4">r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[%]'</span><span class="s0">, </span><span class="s1">item)</span>
+<a name="l435"><span class="ln">435  </span></a>                <span class="s3"># Remove the percentage and store everything else in the item variable</span>
+<a name="l436"><span class="ln">436  </span></a>                <span class="s1">item = re.sub(</span><span class="s4">r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[%]'</span><span class="s0">, </span><span class="s4">''</span><span class="s0">, </span><span class="s1">item)</span>
+<a name="l437"><span class="ln">437  </span></a>                <span class="s1">temp_dict[percentage.group()] = item</span>
+<a name="l438"><span class="ln">438  </span></a>            <span class="s0">return </span><span class="s1">temp_dict</span>
+<a name="l439"><span class="ln">439  </span></a>
+<a name="l440"><span class="ln">440  </span></a>        <span class="s0">if </span><span class="s1">organic_precipitates_list:</span>
+<a name="l441"><span class="ln">441  </span></a>            <span class="s3"># Remove unwanted words</span>
+<a name="l442"><span class="ln">442  </span></a>            <span class="s1">organic_precipitates_list = remove_bad_words(organic_precipitates_list)</span>
+<a name="l443"><span class="ln">443  </span></a>            <span class="s3"># Create list of dictionaries</span>
+<a name="l444"><span class="ln">444  </span></a>            <span class="s1">organic_precipitates_dict = create_dict(organic_precipitates_list)</span>
+<a name="l445"><span class="ln">445  </span></a>
+<a name="l446"><span class="ln">446  </span></a>            <span class="s3"># If the chemical name is 2 characters or less, will assume it is erroneous and will remove from dict</span>
+<a name="l447"><span class="ln">447  </span></a>            <span class="s3"># Python 3 will not allow iterating through a dictionary and removing key:value pairs, so this looks weird</span>
+<a name="l448"><span class="ln">448  </span></a>            <span class="s0">for </span><span class="s1">percentage </span><span class="s0">in </span><span class="s1">list(organic_precipitates_dict.keys()):</span>
+<a name="l449"><span class="ln">449  </span></a>                <span class="s0">if </span><span class="s1">len(organic_precipitates_dict[percentage]) &lt; </span><span class="s5">3</span><span class="s1">:</span>
+<a name="l450"><span class="ln">450  </span></a>                    <span class="s3"># print(f'Deleting: {organic_precipitates_dict[percentage]}')</span>
+<a name="l451"><span class="ln">451  </span></a>                    <span class="s0">del </span><span class="s1">organic_precipitates_dict[percentage]</span>
+<a name="l452"><span class="ln">452  </span></a>
+<a name="l453"><span class="ln">453  </span></a>            <span class="s3"># Get the most similar match from the list of chemicals in the PDB and replace to create some sort of</span>
+<a name="l454"><span class="ln">454  </span></a>            <span class="s3">#   standardization</span>
+<a name="l455"><span class="ln">455  </span></a>            <span class="s0">for </span><span class="s1">percentage</span><span class="s0">, </span><span class="s1">chemical </span><span class="s0">in </span><span class="s1">organic_precipitates_dict.items():</span>
+<a name="l456"><span class="ln">456  </span></a>                <span class="s1">find_closest_match = difflib.get_close_matches(chemical</span><span class="s0">, </span><span class="s1">chemical_list</span><span class="s0">, </span><span class="s5">1</span><span class="s0">, </span><span class="s5">0.2</span><span class="s1">)</span>
+<a name="l457"><span class="ln">457  </span></a>                <span class="s0">if </span><span class="s1">find_closest_match:</span>
+<a name="l458"><span class="ln">458  </span></a>                    <span class="s1">organic_precipitates_dict[percentage] = find_closest_match[</span><span class="s5">0</span><span class="s1">]</span>
+<a name="l459"><span class="ln">459  </span></a>                    <span class="s3"># print(f'Chemical: {chemical}')</span>
+<a name="l460"><span class="ln">460  </span></a>                    <span class="s3"># print(f'Closest Match: {find_closest_match[0]}')</span>
+<a name="l461"><span class="ln">461  </span></a>
+<a name="l462"><span class="ln">462  </span></a>            <span class="s3"># Add the dictionary to the main conditions dataframe</span>
+<a name="l463"><span class="ln">463  </span></a>            <span class="s3"># NOTE: To do this the dictionary must be wrapped in a list</span>
+<a name="l464"><span class="ln">464  </span></a>            <span class="s1">organic_precipitates_list = [organic_precipitates_dict]</span>
+<a name="l465"><span class="ln">465  </span></a>            <span class="s1">self.add_to_dataframe(</span><span class="s4">'Organic_Precipitates'</span><span class="s0">, </span><span class="s1">organic_precipitates_list)</span>
+<a name="l466"><span class="ln">466  </span></a>
+<a name="l467"><span class="ln">467  </span></a>            <span class="s3"># print(organic_precipitates_dict)</span>
+<a name="l468"><span class="ln">468  </span></a>            <span class="s3"># print('\n')</span>
+<a name="l469"><span class="ln">469  </span></a>
+<a name="l470"><span class="ln">470  </span></a>    <span class="s0">def </span><span class="s1">extract_salt_precipitates(self):</span>
+<a name="l471"><span class="ln">471  </span></a>
+<a name="l472"><span class="ln">472  </span></a>        <span class="s1">salt_precipitates_list = []</span>
+<a name="l473"><span class="ln">473  </span></a>        <span class="s1">salt_precipitates_dict = {}</span>
+<a name="l474"><span class="ln">474  </span></a>
+<a name="l475"><span class="ln">475  </span></a>        <span class="s0">for </span><span class="s1">line </span><span class="s0">in </span><span class="s1">self.conditions:</span>
+<a name="l476"><span class="ln">476  </span></a>            <span class="s3"># If the line contains a molarity unit, then process the line</span>
+<a name="l477"><span class="ln">477  </span></a>            <span class="s0">if </span><span class="s1">bool(re.search(</span><span class="s4">r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[M][M]?'</span><span class="s0">, </span><span class="s1">line)):</span>
+<a name="l478"><span class="ln">478  </span></a>
+<a name="l479"><span class="ln">479  </span></a>                <span class="s1">number_of_matches = re.findall(</span><span class="s4">r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[M][M]?'</span><span class="s0">, </span><span class="s1">line)</span>
+<a name="l480"><span class="ln">480  </span></a>                <span class="s1">print(</span><span class="s4">f'The number of matches is: </span><span class="s0">{</span><span class="s1">len(number_of_matches)</span><span class="s0">}</span><span class="s4">'</span><span class="s1">)</span>
+<a name="l481"><span class="ln">481  </span></a>                <span class="s3"># Split the line based on the molar regex</span>
+<a name="l482"><span class="ln">482  </span></a>                <span class="s3"># Must wrap the regex in a capturing group... () ... to keep the matched regex in the created list</span>
+<a name="l483"><span class="ln">483  </span></a>                <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(len(number_of_matches)):</span>
+<a name="l484"><span class="ln">484  </span></a>
+<a name="l485"><span class="ln">485  </span></a>
+<a name="l486"><span class="ln">486  </span></a>                <span class="s1">line = re.split(</span><span class="s4">r'(((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[M][M]?\s?([^\s]+)?\s?([^\s]+)?\s?([^\s]+)?)'</span><span class="s0">, </span><span class="s1">line)</span>
+<a name="l487"><span class="ln">487  </span></a>                <span class="s1">line = list(filter(bool</span><span class="s0">, </span><span class="s1">line))</span>
+<a name="l488"><span class="ln">488  </span></a>                <span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">line:</span>
+<a name="l489"><span class="ln">489  </span></a>                    <span class="s0">if </span><span class="s1">bool(re.search(</span><span class="s4">r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[M][M]?'</span><span class="s0">, </span><span class="s1">x)):</span>
+<a name="l490"><span class="ln">490  </span></a>                        <span class="s1">print(</span><span class="s4">f'The split: </span><span class="s0">{</span><span class="s1">x</span><span class="s0">}</span><span class="s4">'</span><span class="s1">)</span>
+<a name="l491"><span class="ln">491  </span></a>                        <span class="s1">salt_precipitates_list.append(x)</span>
+<a name="l492"><span class="ln">492  </span></a>
+<a name="l493"><span class="ln">493  </span></a>        <span class="s0">def </span><span class="s1">remove_if_contains(salt_prec_list):</span>
+<a name="l494"><span class="ln">494  </span></a>            <span class="s3"># Instead of making the REGEX even more complex, dealing with the matches where something like 5-7MG/ML was</span>
+<a name="l495"><span class="ln">495  </span></a>            <span class="s3">#   erroneously extracted</span>
+<a name="l496"><span class="ln">496  </span></a>            <span class="s1">words_to_exclude = [</span><span class="s4">'MG/ML'</span><span class="s1">]</span>
+<a name="l497"><span class="ln">497  </span></a>            <span class="s0">for </span><span class="s1">item </span><span class="s0">in </span><span class="s1">salt_prec_list:</span>
+<a name="l498"><span class="ln">498  </span></a>                <span class="s1">index = salt_prec_list.index(item)</span>
+<a name="l499"><span class="ln">499  </span></a>                <span class="s0">for </span><span class="s1">word </span><span class="s0">in </span><span class="s1">words_to_exclude:</span>
+<a name="l500"><span class="ln">500  </span></a>                    <span class="s0">if </span><span class="s1">item.find(word) != -</span><span class="s5">1</span><span class="s1">:</span>
+<a name="l501"><span class="ln">501  </span></a>                        <span class="s0">del </span><span class="s1">salt_prec_list[index]</span>
+<a name="l502"><span class="ln">502  </span></a>
+<a name="l503"><span class="ln">503  </span></a>            <span class="s0">return </span><span class="s1">salt_prec_list</span>
+<a name="l504"><span class="ln">504  </span></a>
+<a name="l505"><span class="ln">505  </span></a>        <span class="s0">def </span><span class="s1">create_dict(salt_prec_list):</span>
+<a name="l506"><span class="ln">506  </span></a>            <span class="s1">temp_dict = {}</span>
+<a name="l507"><span class="ln">507  </span></a>            <span class="s1">print(salt_prec_list)</span>
+<a name="l508"><span class="ln">508  </span></a>            <span class="s0">for </span><span class="s1">item </span><span class="s0">in </span><span class="s1">salt_prec_list:</span>
+<a name="l509"><span class="ln">509  </span></a>                <span class="s3"># Find the molarity and store into molarity variable</span>
+<a name="l510"><span class="ln">510  </span></a>                <span class="s1">molarity = re.match(</span><span class="s4">r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[M][M]?'</span><span class="s0">, </span><span class="s1">item)</span>
+<a name="l511"><span class="ln">511  </span></a>                <span class="s3"># Remove the percentage and store everything else in the item variable</span>
+<a name="l512"><span class="ln">512  </span></a>                <span class="s1">item = re.sub(</span><span class="s4">r'((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))?-?((100((\.|,)[0-9]{1,2})?)|([0-9]{1,2}((\.|,)[0-9]{0,2})?))\s?[M][M]?'</span><span class="s0">, </span><span class="s4">''</span><span class="s0">, </span><span class="s1">item)</span>
+<a name="l513"><span class="ln">513  </span></a>                <span class="s1">temp_dict[molarity.group()] = item</span>
+<a name="l514"><span class="ln">514  </span></a>            <span class="s0">return </span><span class="s1">temp_dict</span>
+<a name="l515"><span class="ln">515  </span></a>
+<a name="l516"><span class="ln">516  </span></a>        <span class="s0">if </span><span class="s1">salt_precipitates_list:</span>
+<a name="l517"><span class="ln">517  </span></a>            <span class="s1">salt_precipitates_list = remove_if_contains(salt_precipitates_list)</span>
+<a name="l518"><span class="ln">518  </span></a>
+<a name="l519"><span class="ln">519  </span></a>            <span class="s1">salt_precipitates_dict = create_dict(salt_precipitates_list)</span>
+<a name="l520"><span class="ln">520  </span></a>
+<a name="l521"><span class="ln">521  </span></a>            <span class="s1">print(salt_precipitates_dict)</span>
+<a name="l522"><span class="ln">522  </span></a>            <span class="s1">print(</span><span class="s4">'</span><span class="s0">\n</span><span class="s4">'</span><span class="s1">)</span></pre>
+</body>
+</html>
