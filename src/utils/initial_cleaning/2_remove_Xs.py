@@ -5,7 +5,7 @@ remove_invalid_fasta.py
 
 Removes rows where FASTA_Sequence is entirely X's (e.g. 'XXXX', 'XXXXXXXX').
 Input:  ../../data/processed/FilteredConditions.db
-Output: ../../data/processed/RemovedXs.db
+Output: ../../data/processed/2RemovedXs.db
 """
 
 import sqlite3
@@ -13,7 +13,7 @@ import os
 
 def remove_invalid_fasta(
     input_db="../../data/processed/FilteredConditions.db",
-    output_db="../../data/processed/RemovedXs.db"
+    output_db="../../data/processed/2RemovedXs.db"
 ):
     if not os.path.exists(input_db):
         raise FileNotFoundError(f"Input database not found: {input_db}")
@@ -43,7 +43,7 @@ def remove_invalid_fasta(
     conn_out.commit()
     conn_in.close()
     conn_out.close()
-    print(f"✅ Removed invalid FASTA rows. Cleaned DB saved to {output_db}")
+    print(f"Removed invalid FASTA rows. Cleaned DB saved to {output_db}")
 
 
 if __name__ == "__main__":

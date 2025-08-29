@@ -45,7 +45,7 @@ def build_fasta_db(fasta_directory, db_path="../../data/fasta_sequences.db"):
         conn.commit()
 
     conn.close()
-    print(f"✅ Inserted {len(rows)} sequences into {db_path}")
+    print(f"Inserted {len(rows)} sequences into {db_path}")
 
 if __name__ == "__main__":
     # Allow path override when run via subprocess

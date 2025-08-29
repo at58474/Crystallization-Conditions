@@ -10,7 +10,7 @@ Keeps only rows that:
   - Have FASTA_Sequence
   - Contain at least one chemical (Organic_Precipitates OR Salt_Precipitates not NULL)
 
-Writes result to: ../../data/processed/FilteredConditions.db
+Writes result to: ../../data/processed/1FilteredConditions.db
 """
 
 import sqlite3
@@ -18,20 +18,20 @@ from pathlib import Path
 
 def filter_conditions(
     source_db="../../data/Conditions.db",
-    target_db="../../data/processed/FilteredConditions.db"
+    target_db="../../data/processed/1FilteredConditions.db"
 ):
     # Ensure output directory exists
     Path(target_db).parent.mkdir(parents=True, exist_ok=True)
 
     # Connect to source and target
-    src_conn = sqlite3.connect(source_db)
-    tgt_conn = sqlite3.connect(target_db)
+    conn_in = sqlite3.connect(source_db)
+    cur_in = conn_in.cursor()
 
-    src_cur = src_conn.cursor()
-    tgt_cur = tgt_conn.cursor()
+    conn_out = sqlite3.connect(target_db)
+    cur_out = conn_out.cursor()
 
     # Recreate the same schema
-    tgt_cur.execute("""
+    cur_out.execute("""
         CREATE TABLE IF NOT EXISTS conditions (
             Protein_ID TEXT PRIMARY KEY,
             FASTA_Sequence TEXT,
@@ -46,7 +46,7 @@ def filter_conditions(
     """)
 
     # Select only the rows of interest
-    src_cur.execute("""
+    cur_in.execute("""
         SELECT *
         FROM conditions
         WHERE Protein_ID IS NOT NULL
@@ -56,18 +56,18 @@ def filter_conditions(
              OR Salt_Precipitates IS NOT NULL
           )
     """)
-    rows = src_cur.fetchall()
+    rows = cur_in.fetchall()
 
     # Insert into target DB
-    tgt_cur.executemany("""
+    cur_out.executemany("""
         INSERT OR REPLACE INTO conditions VALUES (?,?,?,?,?,?,?,?,?)
     """, rows)
 
-    tgt_conn.commit()
-    src_conn.close()
-    tgt_conn.close()
+    conn_out.commit()
+    conn_in.close()
+    conn_out.close()
 
-    print(f"✅ Filtered {len(rows)} rows into {target_db}")
+    print(f"Filtered {len(rows)} rows into {target_db}")
 
 
 if __name__ == "__main__":

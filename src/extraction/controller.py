@@ -90,7 +90,7 @@ def preload_fasta_sequences(fasta_file_folder, fasta_db_path="../../data/fasta_s
     - Returns a dict {Protein_ID: FASTA_Sequence}.
     """
     if not os.path.exists(fasta_db_path):
-        print(f"⚠️ FASTA database not found at {fasta_db_path}. Building it now...")
+        print(f"FASTA database not found at {fasta_db_path}. Building it now...")
         subprocess.run(
             ["python", "build_fasta_db.py", fasta_file_folder],
             check=True,
@@ -112,7 +112,7 @@ def preload_fasta_sequences(fasta_file_folder, fasta_db_path="../../data/fasta_s
 
     conn.close()
 
-    print(f"✅ Loaded {len(fasta_map)} FASTA sequences from {fasta_db_path}")
+    print(f"Loaded {len(fasta_map)} FASTA sequences from {fasta_db_path}")
     return fasta_map
 
 
@@ -126,13 +126,13 @@ def run_conditions_extraction():
     """
     # --- Optional ENT → PDB conversion ---
     if run_convert_ent:
-        print("🔄 Running ENT → PDB conversion...")
+        print("Running ENT → PDB conversion...")
         converter = ConvertToPDB(ent_file_folder)
         converter.run()
 
     # --- Optional FASTA extraction ---
     if run_extract_seq:
-        print("🧬 Extracting FASTA sequences...")
+        print("Extracting FASTA sequences...")
         seq_extractor = PDBPreprocessingSequences(
             pdb_file_folder,
             fasta_file_folder,
@@ -202,7 +202,7 @@ def run_conditions_extraction():
             pbar.update(len(batch_result))
 
     conn.close()
-    print(f"✅ Extraction complete. Results written to {db_path}")
+    print(f"Extraction complete. Results written to {db_path}")
 
     if export_csv:
         export_results_to_csv()
@@ -218,7 +218,7 @@ def export_results_to_csv():
 
     out_path = "../../data/processed/CSV_Files/test_data.csv"
     df.to_csv(out_path, index=False)
-    print(f"📄 Exported results to {out_path}")
+    print(f"Exported results to {out_path}")
 
 
 if __name__ == "__main__":
