@@ -164,7 +164,7 @@ class PDBCrystallizationConditions:
     # ---------------------------------------------------------------------
     def extract_remark_280(self):
         """Extract all REMARK 280 lines from the file."""
-        with open(self.file, 'r') as f:
+        with open(self.file, "r", encoding="utf-8", errors="ignore") as f:
             lines = [line for line in f if "REMARK 280" in line]
         self.crystallization_conditions_list = lines
 

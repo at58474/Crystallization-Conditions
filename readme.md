@@ -27,7 +27,7 @@ This project extracts, processes, and stores **crystallization condition data** 
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### 1. Preprocessing (optional)
 If your input files are `.ent` or you need FASTA sequences:
@@ -51,7 +51,7 @@ Results are always stored in **SQLite** for scalability; CSV export is optional.
 
 ---
 
-## 🧪 Tests
+## Tests
 
 Run all unit tests with:
 
@@ -64,7 +64,7 @@ pytest
 
 ---
 
-## ⚡ Performance
+## Performance
 
 - Multiprocessing is used to process thousands of PDB files efficiently.  
 - SQLite database backend ensures scalable storage of results.  
@@ -76,7 +76,7 @@ For extremely large datasets (e.g., >500k files):
 
 ---
 
-## 📖 Key Extraction Logic
+## Key Extraction Logic
 
 - **Solvent Content**: Extracted from `REMARK 280 SOLVENT CONTENT`.  
 - **Matthews Coefficient**: Extracted after `:` in `REMARK 280 MATTHEWS COEFFICIENT`.  
@@ -101,7 +101,7 @@ pip install -r requirements.txt
 
 ---
 
-## ✅ Example Output
+## Example Output
 
 **SQLite table (`conditions`)**:
 

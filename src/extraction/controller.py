@@ -13,7 +13,7 @@ Features:
 
 from pathlib import Path
 from multiprocessing import Pool
-import sqlite3
+import sqlite3, os, subprocess
 import pandas as pd
 import re
 from tqdm import tqdm
@@ -25,14 +25,39 @@ from extract_sequence import PDBPreprocessingSequences
 # ---------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------
-pdb_file_folder = '../../data/raw/PDB_Files_Test'
-fasta_file_folder = '../../data/raw/Protein_Sequences/SEQRES'
-ent_file_folder = '../../data/raw/ENT_Files_Test'
+
+# Run type values are 'testing' and 'production', sets the correct filepath
+run_type = 'production'
+
+if run_type == 'testing':
+    # ---------------------------------------------------------------------
+    # Testing
+    # ---------------------------------------------------------------------
+    # Used by convert_ent_to_pdb.py
+    # For converting ENT files to PDB files (preprocessing)
+    ent_file_folder = '../../data/raw/ENT_Files_Test'
+    # Used by extract_sequence.py and ccmodule.py
+    # Where the PDB files are stored
+    pdb_file_folder = '../../data/raw/PDB_Files_Test'
+    # Used by extract_sequence.py and ccmodule.py
+    # Where FASTA files are written
+    fasta_file_folder = '../../data/raw/Protein_Sequences/SEQRES'
+
+elif run_type == 'production':
+    # ---------------------------------------------------------------------
+    # Production
+    # ---------------------------------------------------------------------
+    ent_file_folder = 'D:/PDB_extracted'
+    pdb_file_folder = 'D:/PDB_extracted'
+    fasta_file_folder = 'D:/Data/Protein_Sequences/SEQRES'
+
+
 db_path = "../../data/Conditions.db"
+
 
 batch_size = 100          # PDB files per worker batch
 insert_batch_size = 500   # rows per SQLite insert batch
-export_csv = True         # toggle CSV snapshot
+export_csv = False         # toggle CSV snapshot
 run_convert_ent = False   # toggle ENT→PDB conversion
 run_extract_seq = False   # toggle FASTA extraction
 
@@ -44,21 +69,10 @@ extract_chunksize = 50    # number of files per worker chunk
 # ---------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------
-def load_fasta_sequences(fasta_directory):
-    """
-    Load FASTA sequences into a dict keyed by Protein_ID.
-    """
-    fasta_map = {}
-    fasta_files = Path(fasta_directory).glob("*.fasta")
-    for file in fasta_files:
-        with open(file, 'r') as f:
-            lines = f.read().splitlines()
-        protein_id = re.search(r'[A-Z0-9]{4}:[A-Z]', lines[0])
-        if protein_id:
-            protein_id = protein_id.group().split(':', 1)[0]
-            fasta_seq = "".join(lines[1:])
-            fasta_map[protein_id] = fasta_seq
-    return fasta_map
+from tqdm import tqdm
+import multiprocessing
+import re
+from pathlib import Path
 
 
 def process_batch(file_list):
@@ -67,6 +81,39 @@ def process_batch(file_list):
     This is called inside multiprocessing workers.
     """
     return [process_pdb_file(f) for f in file_list]
+
+
+def preload_fasta_sequences(fasta_file_folder, fasta_db_path="../../data/fasta_sequences.db"):
+    """
+    Ensure FASTA sequences are available in a SQLite database.
+    - If the database doesn't exist, build it using build_fasta_db.py.
+    - Returns a dict {Protein_ID: FASTA_Sequence}.
+    """
+    if not os.path.exists(fasta_db_path):
+        print(f"⚠️ FASTA database not found at {fasta_db_path}. Building it now...")
+        subprocess.run(
+            ["python", "build_fasta_db.py", fasta_file_folder],
+            check=True,
+            cwd=os.path.dirname(__file__)
+        )
+
+    # Load FASTAs from the database with progress bar
+    conn = sqlite3.connect(fasta_db_path)
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM fasta_sequences")
+    total = cur.fetchone()[0]
+
+    cur.execute("SELECT Protein_ID, FASTA_Sequence FROM fasta_sequences")
+    fasta_map = {}
+    with tqdm(total=total, desc="Loading FASTA sequences", unit="seq") as pbar:
+        for pid, seq in cur:
+            fasta_map[pid] = seq
+            pbar.update(1)
+
+    conn.close()
+
+    print(f"✅ Loaded {len(fasta_map)} FASTA sequences from {fasta_db_path}")
+    return fasta_map
 
 
 # ---------------------------------------------------------------------
@@ -95,12 +142,20 @@ def run_conditions_extraction():
         seq_extractor.handle_multiprocessing()
 
     # --- Main extraction ---
+    print("Getting pdb_files list...")
     pdb_files = list(Path(pdb_file_folder).glob("*.pdb"))
+    print("Getting pdb_files list: COMPLETE")
+    print("Calculating total number of files...")
     total_files = len(pdb_files)
+    print(f"Calculating total number of files: COMPLETE with {total_files} files")
+    print("Setting up batches...")
     batches = [pdb_files[i:i + batch_size] for i in range(0, total_files, batch_size)]
+    print("Setting up batches: COMPLETE")
 
     # Pre-load FASTA sequences
-    fasta_map = load_fasta_sequences(fasta_file_folder)
+    print("Preloading FASTA sequences...")
+    fasta_map = preload_fasta_sequences(fasta_file_folder)
+    print("Preloading FASTA sequences: COMPLETE")
 
     # Setup SQLite DB
     conn = sqlite3.connect(db_path)
@@ -130,6 +185,7 @@ def run_conditions_extraction():
     """
 
     # Process files in parallel batches
+    print("Extraction starting...")
     with Pool() as pool, tqdm(total=total_files, desc="Processing PDB files") as pbar:
         for batch_result in pool.imap_unordered(process_batch, batches):
             # Merge FASTA into each row
